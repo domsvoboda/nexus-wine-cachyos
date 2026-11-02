@@ -65,7 +65,11 @@
 #include <spa/param/param.h>
 #include <spa/param/props.h>
 #include <spa/param/audio/format-utils.h>
+/* SPA JSON helpers use C99 variable-length arrays in the pinned SDK. */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wvla"
 #include <spa/utils/json.h>
+#pragma GCC diagnostic pop
 
 #include "ntstatus.h"
 #define WIN32_NO_STATUS
