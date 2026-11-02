@@ -889,6 +889,7 @@ SOURCES = \
 	windows.devices.radios.idl \
 	windows.devices.usb.idl \
 	windows.foundation.collections.idl \
+	windows.foundation.diagnostics.idl \
 	windows.foundation.idl \
 	windows.foundation.metadata.idl \
 	windows.foundation.numerics.idl \
@@ -957,6 +958,7 @@ SOURCES = \
 	windows.ui.xaml.hosting.desktopwindowxamlsource.idl \
 	windows.ui.xaml.idl \
 	windows.ui.xaml.interop.idl \
+	windows.ui.text.core.idl \
 	windowscontracts.idl \
 	windowsx.h \
 	wine/afd.h \
@@ -965,6 +967,7 @@ SOURCES = \
 	wine/condrv.h \
 	wine/dcetypes.idl \
 	wine/debug.h \
+	wine/desktop-identity.h \
 	wine/dplaysp.h \
 	wine/epm.idl \
 	wine/exception.h \
