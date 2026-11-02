@@ -3,6 +3,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {execFileSync} from 'node:child_process';
+import crypto from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import {assertRuntimeGitlink} from './source-graph.mjs';
 const root=fileURLToPath(new URL('../',import.meta.url));
@@ -27,4 +28,11 @@ test('merged storage header declares the shared trim descriptor exactly once',()
  const header=fs.readFileSync(new URL('../include/ntddstor.h',import.meta.url),'utf8');
  assert.equal((header.match(/typedef struct _DEVICE_TRIM_DESCRIPTOR\s*\{/g)||[]).length,1);
  assert.match(header,/DWORD\s+Version;\s+DWORD\s+Size;\s+BOOLEAN\s+TrimEnabled;/);
+});
+
+test('actual protocol generator reproduces the checked server headers',()=>{
+ const files=['include/wine/server_protocol.h','server/request_trace.h'];
+ const hashes=()=>files.map(name=>crypto.createHash('sha256').update(fs.readFileSync(root+name)).digest('hex'));
+ const before=hashes();execFileSync(root+'tools/make_requests',[],{cwd:root,stdio:'pipe'});
+ assert.deepEqual(hashes(),before);
 });

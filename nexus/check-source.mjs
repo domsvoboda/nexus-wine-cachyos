@@ -14,7 +14,7 @@ assertRuntimeGitlink(link,lock.xgameruntime);
 if(git(['config','-f','.gitmodules','--get','submodule.dlls/xgameruntime.url'])!=='https://github.com/domsvoboda/nexus-xgameruntime.git')throw Error('Wrong C++ runtime fork');
 if(fs.readFileSync(path.join(root,'configure.ac'),'utf8').includes('WINE_CONFIG_MAKEFILE(dlls/xgameruntime)'))throw Error('C++ runtime must use its upstream CMake build');
 for(const [name,expected]of Object.entries(lock.files)){
-  if(!/^(?:configure\.ac|nexus\/(?:tools\/package-register\.c|tests\/(?:diagnostics-(?:options|channel|event-options)\.cpp|local-host-addresses\.c))|loader\/wine\.inf\.in|include\/(?:appmodel\.h|ntddstor\.h|windows\.(?:applicationmodel|foundation\.diagnostics)\.idl|Makefile\.in)|dlls\/[a-zA-Z0-9_.\/-]+)$/.test(name)||name.includes('..')||!/^[a-f0-9]{64}$/.test(expected))throw Error('Unsafe source lock');
+  if(!/^(?:configure\.ac|nexus\/(?:tools\/package-register\.c|tests\/(?:diagnostics-(?:options|channel|event-options)\.cpp|local-host-addresses\.c))|loader\/wine\.inf\.in|server\/request_trace\.h|include\/(?:appmodel\.h|ntddstor\.h|wine\/server_protocol\.h|windows\.(?:applicationmodel|foundation\.diagnostics)\.idl|Makefile\.in)|dlls\/[a-zA-Z0-9_.\/-]+)$/.test(name)||name.includes('..')||!/^[a-f0-9]{64}$/.test(expected))throw Error('Unsafe source lock');
   const actual=crypto.createHash('sha256').update(fs.readFileSync(path.join(root,name))).digest('hex');
   if(actual!==expected)throw Error('Wine source mismatch: '+name);
 }

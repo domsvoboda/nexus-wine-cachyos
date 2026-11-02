@@ -85,7 +85,9 @@
     "dlls/ws2_32/protocol.c": "5ecc65225c61c6a74efaa1681af8c6f4493157fbd707784e326803dd22812335",
     "dlls/ws2_32/local-host-addrinfo.h": "7f229adc3efb3faa38aaf7dfae3668d767b41e407773fcac292f46ced13e604f",
     "nexus/tests/local-host-addresses.c": "44a17abb8f9239d52f16bbc2190aa0311b4bb3b58b2812c0ebd3b002124bf457",
-    "include/ntddstor.h": "4d62d4a5886d7bbb658dfaa1056f8726549593fb0deed1fb2a6fe931f2b2e55f"
+    "include/ntddstor.h": "4d62d4a5886d7bbb658dfaa1056f8726549593fb0deed1fb2a6fe931f2b2e55f",
+    "include/wine/server_protocol.h": "df155408932517ec4b7a2270419c24789a286131c53bb923084cf008f683972c",
+    "server/request_trace.h": "d91685db5a7f925c1c2f90ea0d93017d7cb8237e4194fe8f5815892875625d3b"
   },
   "variant": "cachyos-experimental",
   "cachyosWine": "cd14106e4fc0f96006005b07985e49cc1517e9c0",
