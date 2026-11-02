@@ -87,7 +87,8 @@
     "nexus/tests/local-host-addresses.c": "44a17abb8f9239d52f16bbc2190aa0311b4bb3b58b2812c0ebd3b002124bf457",
     "include/ntddstor.h": "4d62d4a5886d7bbb658dfaa1056f8726549593fb0deed1fb2a6fe931f2b2e55f",
     "include/wine/server_protocol.h": "df155408932517ec4b7a2270419c24789a286131c53bb923084cf008f683972c",
-    "server/request_trace.h": "d91685db5a7f925c1c2f90ea0d93017d7cb8237e4194fe8f5815892875625d3b"
+    "server/request_trace.h": "d91685db5a7f925c1c2f90ea0d93017d7cb8237e4194fe8f5815892875625d3b",
+    "dlls/mountmgr.sys/device.c": "6f527b6faca59a5eed702478d13f868c696abe227c168b7d56720d908b6698c1"
   },
   "variant": "cachyos-experimental",
   "cachyosWine": "cd14106e4fc0f96006005b07985e49cc1517e9c0",

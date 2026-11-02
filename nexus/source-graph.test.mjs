@@ -36,3 +36,10 @@ test('actual protocol generator reproduces the checked server headers',()=>{
  const before=hashes();execFileSync(root+'tools/make_requests',[],{cwd:root,stdio:'pipe'});
  assert.deepEqual(hashes(),before);
 });
+
+test('merged trim property retains one genuine capability query and no constant success',()=>{
+ const source=fs.readFileSync(new URL('../dlls/mountmgr.sys/device.c',import.meta.url),'utf8');
+ assert.equal((source.match(/case StorageDeviceTrimProperty:/g)||[]).length,1);
+ assert.ok(source.includes('status = query_device_trim( device, &enabled );'));
+ assert.ok(!source.includes('Returning TRUE for StorageDeviceTrimProperty'));
+});
