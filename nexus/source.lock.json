@@ -12,7 +12,7 @@
     "include/appmodel.h": "768a40ba75985c54a514295de4b522a84e6f5bd984492b04088d83144d5b5c48",
     "dlls/windows.applicationmodel/package.c": "64eeec1fcac37e97f4d918c04bbf1b40f30aba79670d887b338d94b5fa94f7d3",
     "dlls/windows.applicationmodel/tests/model.c": "4b2218a627e80191810ddc390a3d2d74dc093d5f1e9132680edaeaca971985bc",
-    "configure.ac": "d6e076340333ccf16a731d01f0dcb313fe37b8b4a6ac20784b1cea6f25eaa9c4",
+    "configure.ac": "74c937757f0679a0c89d0b07c784de11e0c5b41801f701732971abb9660bacdb",
     "dlls/advapi32/cred.c": "993bc2bf27d2797da7f11b026b1bf1bfb8abf37ca75334a801a55627c4eced62",
     "dlls/bcrypt/gnutls.c": "3ae97eeb5eaf0a474d081e1089a3c958c8c0fc0062379312394dcf5d76661dab",
     "dlls/bcrypt/tests/bcrypt.c": "9f0fbe586857c51087a1d66a9053fecd81d2c2e3c1646ba7d280c73436443beb",

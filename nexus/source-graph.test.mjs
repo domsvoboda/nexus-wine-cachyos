@@ -15,3 +15,10 @@ test('declared runtime pin equals the actual Wine index gitlink',()=>{
  assert.throws(()=>assertRuntimeGitlink(actual.replace('160000','100644'),lock.xgameruntime));
  assert.throws(()=>assertRuntimeGitlink(actual+'\n'+actual,lock.xgameruntime));
 });
+
+test('Wayland Autoconf tests actual header paths without punctuation',()=>{
+ const source=fs.readFileSync(new URL('../configure.ac',import.meta.url),'utf8');
+ const block=source.match(/WINE_PACKAGE_FLAGS\(XKBCOMMON,[\s\S]*?AC_CHECK_HEADERS\(\[([^\]]+)\]/);
+ assert.ok(block);const headers=block[1].trim().split(/\s+/);
+ assert.deepEqual(headers,['xkbcommon/xkbcommon.h','xkbcommon/xkbcommon-compose.h']);
+});
