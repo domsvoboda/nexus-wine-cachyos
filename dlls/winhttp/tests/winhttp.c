@@ -2606,12 +2606,33 @@ static DWORD CALLBACK server_thread(LPVOID param)
                 key[24] = 0;
 
                 create_websocket_accept(key, accept, sizeof(accept));
+                if (strstr(buffer, "GET /websocket-ping ")) accept[strcspn(accept, "\r\n")] = 0;
 
                 strcat(headers, "Sec-WebSocket-Accept: ");
                 strcat(headers, accept);
                 strcat(headers, "\r\n\r\n");
 
                 send(c, headers, strlen(headers), 0);
+                if (strstr(buffer, "GET /websocket-ping "))
+                {
+                    static const unsigned char frames[] = {0x89,3,'p','i','n',0x81,4,'a','b','c','d'};
+                    unsigned char pong[9];
+                    int size, timeout = 3000;
+
+                    setsockopt(c, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout));
+                    send(c, (const char *)frames, sizeof(frames), 0);
+                    size = recv(c, (char *)pong, sizeof(pong), MSG_WAITALL);
+                    ok(size == sizeof(pong), "pong frame size %d\n", size);
+                    if (size == sizeof(pong))
+                    {
+                        ok(pong[0] == 0x8a && pong[1] == 0x83, "invalid pong header %02x %02x\n", pong[0], pong[1]);
+                        ok((pong[6] ^ pong[2]) == 'p' && (pong[7] ^ pong[3]) == 'i' &&
+                           (pong[8] ^ pong[4]) == 'n', "pong did not echo ping payload\n");
+                    }
+                    shutdown(c, 2);
+                    closesocket(c);
+                    c = -1;
+                }
                 continue;
             }
             else send(c, notokmsg, sizeof(notokmsg) - 1, 0);
@@ -3477,6 +3498,55 @@ cleanup:
     WinHttpCloseHandle(req);
     WinHttpCloseHandle(con);
     WinHttpCloseHandle(ses);
+}
+
+static void test_websocket_ping(int port)
+{
+    HINTERNET session = NULL, connection = NULL, request = NULL, socket = NULL;
+    WINHTTP_WEB_SOCKET_BUFFER_TYPE type;
+    DWORD count = 0, error;
+    char buffer[16];
+    BOOL ret;
+
+    if (!pWinHttpWebSocketCompleteUpgrade)
+    {
+        win_skip("WinHttpWebSocketCompleteUpgrade not supported\n");
+        return;
+    }
+    session = WinHttpOpen(L"winetest", WINHTTP_ACCESS_TYPE_NO_PROXY, NULL, NULL, 0);
+    ok(session != NULL, "session failed %lu\n", GetLastError());
+    if (!session) goto done;
+    WinHttpSetTimeouts(session, 3000, 3000, 3000, 3000);
+    connection = WinHttpConnect(session, L"localhost", port, 0);
+    ok(connection != NULL, "connection failed %lu\n", GetLastError());
+    if (!connection) goto done;
+    request = WinHttpOpenRequest(connection, L"GET", L"/websocket-ping", NULL, NULL, NULL, 0);
+    ok(request != NULL, "request failed %lu\n", GetLastError());
+    if (!request) goto done;
+    ret = WinHttpSetOption(request, WINHTTP_OPTION_UPGRADE_TO_WEB_SOCKET, NULL, 0);
+    ok(ret, "upgrade option failed %lu\n", GetLastError());
+    if (!ret) goto done;
+    ret = WinHttpSendRequest(request, NULL, 0, NULL, 0, 0, 0);
+    ok(ret, "send failed %lu\n", GetLastError());
+    if (!ret) goto done;
+    ret = WinHttpReceiveResponse(request, NULL);
+    ok(ret, "receive failed %lu\n", GetLastError());
+    if (!ret) goto done;
+    socket = pWinHttpWebSocketCompleteUpgrade(request, 0);
+    ok(socket != NULL, "upgrade failed %lu\n", GetLastError());
+    if (!socket) goto done;
+    error = pWinHttpWebSocketReceive(socket, buffer, sizeof(buffer), &count, &type);
+    ok(!error, "receive after ping failed %lu\n", error);
+    if (!error)
+    {
+        ok(count == 4 && !memcmp(buffer, "abcd", 4), "unexpected message size %lu\n", count);
+        ok(type == WINHTTP_WEB_SOCKET_UTF8_MESSAGE_BUFFER_TYPE, "unexpected type %u\n", type);
+    }
+done:
+    if (socket) WinHttpCloseHandle(socket);
+    if (request) WinHttpCloseHandle(request);
+    if (connection) WinHttpCloseHandle(connection);
+    if (session) WinHttpCloseHandle(session);
 }
 
 static void test_websocket(int port)
@@ -6349,6 +6419,58 @@ static void test_connection_cache(int port)
     WinHttpCloseHandle(ses);
 }
 
+static void test_decompression(void)
+{
+    HINTERNET ses, req, con;
+    DWORD decompression, len, status, size;
+    BOOL ret;
+
+    ses = WinHttpOpen( L"winetest", WINHTTP_ACCESS_TYPE_NO_PROXY, NULL, NULL, 0 );
+    ok( ses != NULL, "got %lu\n", GetLastError() );
+
+    decompression = WINHTTP_DECOMPRESSION_FLAG_ALL;
+    ret = WinHttpSetOption( ses, WINHTTP_OPTION_DECOMPRESSION, &decompression, sizeof(decompression) );
+    ok( ret, "got %lu\n", GetLastError() );
+
+    con = WinHttpConnect( ses, L"test.winehq.org", 0, 0 );
+    ok( con != NULL, "got %lu\n", GetLastError() );
+
+    req = WinHttpOpenRequest( con, NULL, L"tests/gzip.php", NULL, NULL, NULL, 0 );
+    ok( req != NULL, "got %lu\n", GetLastError() );
+
+    ret = WinHttpSendRequest( req, NULL, 0, NULL, 0, 0, 0 );
+    ok( ret, "got %lu\n", GetLastError() );
+
+    ret = WinHttpReceiveResponse( req, NULL );
+    ok( ret, "got %lu\n", GetLastError() );
+
+    status = 0xdeadbeef;
+    size = sizeof(status);
+    ret = WinHttpQueryHeaders( req, WINHTTP_QUERY_STATUS_CODE | WINHTTP_QUERY_FLAG_NUMBER, NULL, &status, &size, NULL );
+    ok( ret, "got %lu\n", GetLastError() );
+    ok( status == HTTP_STATUS_OK, "got %lu\n", status );
+
+    len = 0xdeadbeef;
+    size = sizeof(len);
+    ret = WinHttpQueryHeaders( req, WINHTTP_QUERY_CONTENT_LENGTH | WINHTTP_QUERY_FLAG_NUMBER, NULL, &len, &size, 0 );
+    ok( !ret && GetLastError() == ERROR_WINHTTP_HEADER_NOT_FOUND, "got %lu\n", GetLastError() );
+    ok( len == 0xdeadbeef, "got %lu\n", len );
+
+    for (;;)
+    {
+        char buf[4096];
+
+        size = 0;
+        ret = WinHttpReadData( req, buf, sizeof(buf), &size );
+        ok( ret, "got %lu\n", GetLastError() );
+        if (!ret || !size) break;
+    }
+
+    WinHttpCloseHandle( req );
+    WinHttpCloseHandle( con );
+    WinHttpCloseHandle( ses );
+}
+
 START_TEST (winhttp)
 {
     struct server_info si;
@@ -6383,6 +6505,7 @@ START_TEST (winhttp)
     test_WinHttpGetIEProxyConfigForCurrentUser();
     test_chunked_read();
     test_max_http_automatic_redirects();
+    test_decompression();
 
     si.event = CreateEventW(NULL, 0, 0, NULL);
     si.port = 7532;
@@ -6415,6 +6538,7 @@ START_TEST (winhttp)
     test_request_path_escapes(si.port);
     test_passport_auth(si.port);
     test_websocket(si.port);
+    test_websocket_ping(si.port);
     test_redirect(si.port, L"/redirect-temp", L"temporary");
     test_redirect(si.port, L"/redirect-perm", L"permanent");
     test_WinHttpGetProxyForUrl(si.port);
