@@ -22,3 +22,9 @@ test('Wayland Autoconf tests actual header paths without punctuation',()=>{
  assert.ok(block);const headers=block[1].trim().split(/\s+/);
  assert.deepEqual(headers,['xkbcommon/xkbcommon.h','xkbcommon/xkbcommon-compose.h']);
 });
+
+test('merged storage header declares the shared trim descriptor exactly once',()=>{
+ const header=fs.readFileSync(new URL('../include/ntddstor.h',import.meta.url),'utf8');
+ assert.equal((header.match(/typedef struct _DEVICE_TRIM_DESCRIPTOR\s*\{/g)||[]).length,1);
+ assert.match(header,/DWORD\s+Version;\s+DWORD\s+Size;\s+BOOLEAN\s+TrimEnabled;/);
+});
