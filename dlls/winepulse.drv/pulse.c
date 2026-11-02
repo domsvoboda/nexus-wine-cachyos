@@ -1977,7 +1977,6 @@ static NTSTATUS pulse_start(void *args)
 {
     struct start_params *params = args;
     struct pulse_stream *stream = handle_get_stream(params->stream);
-    static const WCHAR name[] = {'a','u','d','i','o','_','c','l','i','e','n','t','_','t','i','m','e','r',0};
     int success;
 
     params->result = S_OK;
