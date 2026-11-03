@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "base": "7fc704ef49c50e9702c9983a5250d5738697bb04",
-  "xgameruntime": "c7ac159c76a20fbed1d57b82ebafc205c1469f60",
+  "xgameruntime": "78780314332079f77052fbeb345b6f7e11e7a44d",
   "files": {
     "loader/wine.inf.in": "731164b904ee21c9ffc7e383e542d540168688c6182e446b2f86a4e0c84bd559",
     "dlls/windows.storage.applicationdata/Makefile.in": "87fe136e13ec37bb0222263268548657e782eebe91804729780522bd788bbe6c",
