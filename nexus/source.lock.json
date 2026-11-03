@@ -26,7 +26,7 @@
     "dlls/ncrypt/main.c": "2576ba71eeedd78f1fd71c55bba3043fe2006e55dbdf6058720fa452217bb523",
     "dlls/ncrypt/ncrypt_internal.h": "2b5636b57374b6bc8ae96c5603501d273fdd3734c76750e2ae4fd6bebcebd366",
     "dlls/ncrypt/tests/ncrypt.c": "37d957e4e4d37366fb28c8ccf578e905489a8adf739d11e78006d4804ba66478",
-    "dlls/ntdll/unix/loader.c": "5888c108c1857bae61bdc0aaaba622638d38e8ed46486a84c40fa5a8e0b90d6f",
+    "dlls/ntdll/unix/loader.c": "63ccea5185159382c7ed7287eb4d970b2d28af0faa3a3d7234c0d75d14566199",
     "dlls/propsys/propsys_main.c": "250b3489cc5e679fe9012515b645ca9c6570f59ed8779d7c7fd7113facacda6a",
     "dlls/twinapi.appcore/Makefile.in": "5e4bc0304134b666989cfb01858d34878173e858679e7d6745c1ccde987cce45",
     "dlls/twinapi.appcore/appstate-registration.h": "f011a711a77fd91a7d30d63f91adebcc31a2c161130af1160cd2b960f812f016",
@@ -90,7 +90,12 @@
     "server/request_trace.h": "d91685db5a7f925c1c2f90ea0d93017d7cb8237e4194fe8f5815892875625d3b",
     "dlls/mountmgr.sys/device.c": "6f527b6faca59a5eed702478d13f868c696abe227c168b7d56720d908b6698c1",
     "dlls/winepulse.drv/pulse.c": "18b5ed408884dc6eece046d732c6450438bbd5bf958341be802576ecfedfd4ed",
-    "dlls/winepipewire.drv/pipewire.c": "78f46b83b4c8f6d959e674e0402bed7e1f9020cba3dfc9d9fd22abd8edb1d0df"
+    "dlls/winepipewire.drv/pipewire.c": "78f46b83b4c8f6d959e674e0402bed7e1f9020cba3dfc9d9fd22abd8edb1d0df",
+    "dlls/ntdll/loader.c": "0d5a904edce10c1609b0be832abf56875672c345c7207949508fdbb08fc8ea92",
+    "dlls/ntdll/ntdll.spec": "a5d5aae6c24d0bda56122cebc6a90d2fdfc811ff5a67c3438ba7aa68c87ecf9d",
+    "dlls/ntdll/unix/process.c": "12c3e6ba75dd6320c401b080e265dbb1180660a8e6465643c30ba692ae8ae61a",
+    "dlls/ntdll/unix/unix_private.h": "04087dc96543f386ddc59af9bbc9b80d891b3ba36f14f1c583195dc6dc446aff",
+    "dlls/ntdll/unixlib.h": "0e3668417ce43ce70335841d4221c28adda6a6f252bd812d1285be5a1562f9d3"
   },
   "variant": "cachyos-experimental",
   "cachyosWine": "cd14106e4fc0f96006005b07985e49cc1517e9c0",
