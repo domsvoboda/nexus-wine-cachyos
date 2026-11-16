@@ -2,7 +2,12 @@
   "schema": 1,
   "base": "7fc704ef49c50e9702c9983a5250d5738697bb04",
   "xgameruntime": "45fcf22d45d1d94ec382123a25ba36a2253cc8a7",
+  "variant": "cachyos-experimental",
+  "cachyosWine": "cd14106e4fc0f96006005b07985e49cc1517e9c0",
+  "nexusWine": "81943bb4250cf6b79ce232db65a1b9609e4c3d58",
   "files": {
+    "nexus/tests/gameinput-callback.c": "dcaf7fefa68fd0bd08c24d439d0c1ac2f39c6601b03c1cc0db49b1432c1fb84c",
+    "dlls/gameinput/gameinput.c": "0b87b47b1ff5dadd4c79704f87f392bc5b4dfe78901450499931c8608546096c",
     "loader/wine.inf.in": "731164b904ee21c9ffc7e383e542d540168688c6182e446b2f86a4e0c84bd559",
     "dlls/windows.storage.applicationdata/Makefile.in": "87fe136e13ec37bb0222263268548657e782eebe91804729780522bd788bbe6c",
     "dlls/windows.storage.applicationdata/applicationdata.c": "d40619b5cb289d5d1387e8c6cef0f07f6e77f6a68ab7c8ea06e230c49239804e",
@@ -85,9 +90,6 @@
     "dlls/ws2_32/protocol.c": "5ecc65225c61c6a74efaa1681af8c6f4493157fbd707784e326803dd22812335",
     "dlls/ws2_32/local-host-addrinfo.h": "7f229adc3efb3faa38aaf7dfae3668d767b41e407773fcac292f46ced13e604f",
     "nexus/tests/local-host-addresses.c": "44a17abb8f9239d52f16bbc2190aa0311b4bb3b58b2812c0ebd3b002124bf457",
-    "include/ntddstor.h": "4d62d4a5886d7bbb658dfaa1056f8726549593fb0deed1fb2a6fe931f2b2e55f",
-    "include/wine/server_protocol.h": "df155408932517ec4b7a2270419c24789a286131c53bb923084cf008f683972c",
-    "server/request_trace.h": "d91685db5a7f925c1c2f90ea0d93017d7cb8237e4194fe8f5815892875625d3b",
     "dlls/mountmgr.sys/device.c": "6f527b6faca59a5eed702478d13f868c696abe227c168b7d56720d908b6698c1",
     "dlls/winepulse.drv/pulse.c": "18b5ed408884dc6eece046d732c6450438bbd5bf958341be802576ecfedfd4ed",
     "dlls/winepipewire.drv/pipewire.c": "78f46b83b4c8f6d959e674e0402bed7e1f9020cba3dfc9d9fd22abd8edb1d0df",
@@ -100,9 +102,9 @@
     "dlls/winhttp/tests/Makefile.in": "d73bd87967f3c81c5ec90f333fa425b4efb1545ba8cc5aa29ed5e0fa218d8295",
     "dlls/winhttp/tests/cancellation.c": "f715a34efd9f51acdce016461c6f4feb7bc4fbe5d6ec8129373b0b66864ac786",
     "dlls/windows.applicationmodel/package_dependencies.h": "e8a858ec50f7cad3cc2f2118f19f90782a65bcc7eaef2ba6b228a6be267c1abd",
-    "include/winhttp.h": "cbe7f364d4cf232d584913089b96fe506f1546ade1fd2a3ba96a21ad828303fb"
-  },
-  "variant": "cachyos-experimental",
-  "cachyosWine": "cd14106e4fc0f96006005b07985e49cc1517e9c0",
-  "nexusWine": "81943bb4250cf6b79ce232db65a1b9609e4c3d58"
+    "include/winhttp.h": "cbe7f364d4cf232d584913089b96fe506f1546ade1fd2a3ba96a21ad828303fb",
+    "include/ntddstor.h": "4d62d4a5886d7bbb658dfaa1056f8726549593fb0deed1fb2a6fe931f2b2e55f",
+    "include/wine/server_protocol.h": "df155408932517ec4b7a2270419c24789a286131c53bb923084cf008f683972c",
+    "server/request_trace.h": "d91685db5a7f925c1c2f90ea0d93017d7cb8237e4194fe8f5815892875625d3b"
+  }
 }
