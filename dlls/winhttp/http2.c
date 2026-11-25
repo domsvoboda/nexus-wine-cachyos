@@ -19,7 +19,15 @@
 
 WINE_DEFAULT_DEBUG_CHANNEL(winhttp);
 
-#define H2_WINDOW 65535
+/* RFC 9113 default for both the stream and the connection flow-control windows. */
+#define H2_DEFAULT_WINDOW 65535
+/* Receive window advertised for the response stream and the connection, and
+ * the size of the buffer behind it. Flow control keeps the unread data within
+ * the advertised window, so the buffer cannot overflow. A 64 KiB window limits
+ * one stream to window / round-trip time (about 0.9 MB/s at 70 ms) however fast
+ * the link is, which made large downloads such as connected-storage save blobs
+ * crawl. */
+#define H2_RECEIVE_WINDOW (4 * 1024 * 1024)
 #define H2_HEADERS_LIMIT 65536
 #define H2_FUNCTIONS(X) \
  X(session_callbacks_new) X(session_callbacks_del) \
@@ -27,7 +35,8 @@ WINE_DEFAULT_DEBUG_CHANNEL(winhttp);
  X(session_callbacks_set_on_data_chunk_recv_callback) X(session_callbacks_set_on_stream_close_callback) \
  X(option_new) X(option_del) X(option_set_no_auto_window_update) \
  X(session_client_new2) X(session_del) X(submit_settings) X(submit_request) \
- X(session_mem_send2) X(session_mem_recv2) X(session_resume_data) X(session_consume)
+ X(session_mem_send2) X(session_mem_recv2) X(session_resume_data) X(session_consume) \
+ X(submit_window_update)
 #define DECLARE(name) static __typeof__(nghttp2_##name) *p_##name;
 H2_FUNCTIONS(DECLARE)
 #undef DECLARE
@@ -41,7 +50,8 @@ struct http2_connection
     int32_t stream;
     DWORD error, status;
     BOOL headers_ready, ended, response_installed;
-    BYTE body[H2_WINDOW];
+    BYTE *storage; /* H2_RECEIVE_WINDOW bytes, allocated with the session */
+    BYTE *body;    /* unread response data: body_len bytes at an offset into storage */
     size_t body_len, header_len;
     char headers[H2_HEADERS_LIMIT + 1];
     const BYTE *upload;
@@ -351,8 +361,14 @@ static int on_body( nghttp2_session *session, uint8_t flags, int32_t stream,
     struct http2_connection *h2 = user;
     (void)session; (void)flags;
     if (stream != h2->stream) return NGHTTP2_ERR_CALLBACK_FAILURE;
-    if (!h2->headers_ready || length > sizeof(h2->body) - h2->body_len)
+    if (!h2->headers_ready || length > H2_RECEIVE_WINDOW - h2->body_len)
         return NGHTTP2_ERR_CALLBACK_FAILURE;
+    if ((size_t)(h2->body - h2->storage) + h2->body_len + length > H2_RECEIVE_WINDOW)
+    {
+        /* Reads advance the start of the unread data; reclaim that space. */
+        memmove( h2->storage, h2->body, h2->body_len );
+        h2->body = h2->storage;
+    }
     memcpy( h2->body + h2->body_len, data, length );
     h2->body_len += length;
     h2->diag_received += length;
@@ -495,6 +511,7 @@ void http2_destroy( struct netconn *connection )
     struct http2_connection *h2 = connection->http2_state;
     if (!h2) return;
     p_session_del( h2->session );
+    free( h2->storage );
     free( h2 );
     connection->http2_state = NULL;
 }
@@ -508,10 +525,12 @@ static DWORD initialize( struct request *request )
     nghttp2_settings_entry settings[] = {
         { NGHTTP2_SETTINGS_ENABLE_PUSH, 0 },
         { NGHTTP2_SETTINGS_MAX_HEADER_LIST_SIZE, H2_HEADERS_LIMIT },
-        { NGHTTP2_SETTINGS_INITIAL_WINDOW_SIZE, H2_WINDOW }
+        { NGHTTP2_SETTINGS_INITIAL_WINDOW_SIZE, H2_RECEIVE_WINDOW }
     };
     if (!InitOnceExecuteOnce( &library_once, load_library, NULL, NULL )) return ERROR_MOD_NOT_FOUND;
     if (!(h2 = calloc( 1, sizeof(*h2) ))) return ERROR_OUTOFMEMORY;
+    if (!(h2->storage = malloc( H2_RECEIVE_WINDOW ))) { free( h2 ); return ERROR_OUTOFMEMORY; }
+    h2->body = h2->storage;
     h2->connection = request->netconn;
     h2->owner = request; /* Native WinHTTP task owns its object reference. */
     if (p_session_callbacks_new( &callbacks ) || p_option_new( &options )) goto failed;
@@ -525,12 +544,16 @@ static DWORD initialize( struct request *request )
     p_option_del( options ); options = NULL;
     if (result) goto failed;
     if (p_submit_settings( h2->session, NGHTTP2_FLAG_NONE, settings, ARRAY_SIZE(settings) )) goto failed;
+    /* SETTINGS_INITIAL_WINDOW_SIZE only sizes streams. The connection window
+     * stays at the 64 KiB default until it is raised explicitly. */
+    if (p_submit_window_update( h2->session, NGHTTP2_FLAG_NONE, 0, H2_RECEIVE_WINDOW - H2_DEFAULT_WINDOW )) goto failed;
     request->netconn->http2_state = h2;
     return ERROR_SUCCESS;
 failed:
     if (callbacks) p_session_callbacks_del( callbacks );
     if (options) p_option_del( options );
     if (h2->session) p_session_del( h2->session );
+    free( h2->storage );
     free( h2 );
     return ERROR_OUTOFMEMORY;
 }
@@ -688,7 +711,7 @@ DWORD http2_read_data( struct netconn *connection, void *buffer, DWORD length, i
     if (*read)
     {
         memcpy( buffer, h2->body, *read ); h2->body_len -= *read;
-        memmove( h2->body, h2->body + *read, h2->body_len );
+        h2->body = h2->body_len ? h2->body + *read : h2->storage;
         if (p_session_consume( h2->session, h2->stream, *read )) return ERROR_WINHTTP_INVALID_SERVER_RESPONSE;
         return flush_frames( h2 );
     }
